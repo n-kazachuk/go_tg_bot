@@ -1,6 +1,9 @@
 package main
 
 import (
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/joho/godotenv"
+	routerPkg "github.com/n-kazachuk/go_tg_bot/internal/app/router"
 	"log"
 	"os"
 )
