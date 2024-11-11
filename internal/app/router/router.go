@@ -1,7 +1,7 @@
 package router
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/commander"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/path"
 	"log"
