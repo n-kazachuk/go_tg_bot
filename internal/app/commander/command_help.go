@@ -7,8 +7,9 @@ import (
 
 func (c *Commander) Help(inputMessage *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(inputMessage.Chat.ID,
-		"ℹ️ List of commands: \n\n"+
-			"1. /help - Gives you list of all commands \n",
+		"ℹ️ Список команд: \n\n"+
+			"1. /help - Вывести список комманд \n"+
+			"1. /find - Поиск билетов \n",
 	)
 
 	_, err := c.bot.Send(msg)

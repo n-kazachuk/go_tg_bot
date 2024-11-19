@@ -9,10 +9,10 @@ import (
 func (c *Commander) Default(inputMessage *tgbotapi.Message) {
 	log.Printf("[%s] %s", inputMessage.From.UserName, inputMessage.Text)
 
-	msg := tgbotapi.NewMessage(inputMessage.Chat.ID, "❌ Undefined command: "+inputMessage.Text+". Write /help for help")
+	msg := tgbotapi.NewMessage(inputMessage.Chat.ID, "❌ Неизвестная команда: "+inputMessage.Text+". Напиши /help для получения списка команд")
 
 	_, err := c.bot.Send(msg)
 	if err != nil {
-		log.Printf("Help: error sending reply message to chat - %v", err)
+		log.Printf("Default: error sending reply message to chat - %v", err)
 	}
 }

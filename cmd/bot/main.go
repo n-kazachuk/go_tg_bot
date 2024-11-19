@@ -1,40 +1,27 @@
 package main
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
-	routerPkg "github.com/n-kazachuk/go_tg_bot/internal/app/router"
-	"log"
+	"github.com/n-kazachuk/go_tg_bot/internal/app"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
 	_ = godotenv.Load()
 
-	token, found := os.LookupEnv("TOKEN")
-	if !found {
-		log.Panic("environment variable TOKEN not found in .env")
-	}
+	application := app.New()
 
-	bot, err := tgbotapi.NewBotAPI(token)
-	if err != nil {
-		log.Panic(err)
-	}
+	go func() {
+		application.MustRun()
+	}()
 
-	// Uncomment if you want debugging
-	bot.Debug = true
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	<-stop
 
-	u := tgbotapi.UpdateConfig{
-		Timeout: 60,
-	}
-
-	updates := bot.GetUpdatesChan(u)
-
-	routerHandler := routerPkg.NewRouter(bot)
-
-	for update := range updates {
-		routerHandler.HandleUpdate(update)
-	}
+	application.Stop()
 }

@@ -11,20 +11,20 @@ type CommandPath struct {
 
 var ErrUnknownCommand = errors.New("unknown command")
 
-func ParseCommand(commandText string) (CommandPath, error) {
-	if len(commandText) == 0 {
-		return CommandPath{}, ErrUnknownCommand
+func NewCommandPath(commandName string) *CommandPath {
+	return &CommandPath{
+		CommandName: commandName,
 	}
-
-	return CommandPath{
-		CommandName: commandText,
-	}, nil
 }
 
-func (c CommandPath) WithCommandName(commandName string) CommandPath {
-	c.CommandName = commandName
+func ParseCommand(commandText string) (*CommandPath, error) {
+	if len(commandText) == 0 {
+		return nil, ErrUnknownCommand
+	}
 
-	return c
+	return &CommandPath{
+		CommandName: commandText,
+	}, nil
 }
 
 func (c CommandPath) String() string {

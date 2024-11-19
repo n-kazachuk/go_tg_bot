@@ -4,26 +4,36 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/commander"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/path"
+	"github.com/n-kazachuk/go_tg_bot/internal/services"
+	"github.com/n-kazachuk/go_tg_bot/internal/storages"
 	"log"
 	"runtime/debug"
 )
 
 type Commander interface {
-	HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath)
-	HandleCommand(callback *tgbotapi.Message, commandPath path.CommandPath)
+	HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath *path.CallbackPath)
+	HandleCommand(callback *tgbotapi.Message, commandPath *path.CommandPath)
 }
 
 type Router struct {
 	bot       *tgbotapi.BotAPI
+	services  *services.Service
+	storages  *storages.Storage
 	commander Commander
 }
 
-func NewRouter(
+func New(
 	bot *tgbotapi.BotAPI,
+	services *services.Service,
+	storages *storages.Storage,
 ) *Router {
+	cmdr := commander.NewCommander(bot, services, storages)
+
 	return &Router{
 		bot:       bot,
-		commander: commander.NewCommander(bot),
+		commander: cmdr,
+		services:  services,
+		storages:  storages,
 	}
 }
 
@@ -54,15 +64,27 @@ func (r *Router) handleCallback(callback *tgbotapi.CallbackQuery) {
 }
 
 func (r *Router) handleMessage(msg *tgbotapi.Message) {
-	if !msg.IsCommand() {
-		r.showCommandFormat(msg)
+	var commandPath *path.CommandPath
 
+	userContext, err := r.storages.ContextStorage.GetContext(msg.From.ID)
+	if err != nil {
+		log.Printf("Router.handleMessage: error getting active command - %v", err)
+	}
+
+	activeCommand := userContext.ActiveCommand
+	if activeCommand != "" {
+		r.commander.HandleCommand(msg, path.NewCommandPath(activeCommand))
 		return
 	}
 
-	commandPath, err := path.ParseCommand(msg.Command())
+	if !msg.IsCommand() {
+		r.showCommandFormat(msg)
+		return
+	}
+
+	commandPath, err = path.ParseCommand(msg.Command())
 	if err != nil {
-		log.Printf("Router.handleCallback: error parsing callback data `%s` - %v", msg.Command(), err)
+		log.Printf("Router.handleMessage: error parsing callback data `%s` - %v", msg.Command(), err)
 		return
 	}
 
