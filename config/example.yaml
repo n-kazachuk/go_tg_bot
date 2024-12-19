@@ -1,0 +1,18 @@
+env: "local" # Type of environment (prod, local)
+
+pgsql:
+  host: ""
+  port: ""
+  user: ""
+  password: ""
+  dbname: ""
+
+kafka:
+  interval: 100
+  brokers:
+    - ""
+
+telegram:
+  debug: false
+  token: ""
+  timeout: 60

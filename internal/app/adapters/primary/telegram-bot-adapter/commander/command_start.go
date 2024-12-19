@@ -13,11 +13,13 @@ func (c *Commander) Start(inputMessage *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(
 		inputMessage.Chat.ID,
 		fmt.Sprintf("Привет, %s 👋 \n"+
-			"Это бот по поиску билетов. Нажми \"Поиски\" 🔍, чтобы начать", inputMessage.From.FirstName),
+			"Это бот по поиску билетов", inputMessage.From.FirstName),
 	)
 
 	_, err := c.bot.Send(msg)
 	if err != nil {
 		log.Printf("Start: error sending reply message to chat - %v", err)
 	}
+
+	c.Default(inputMessage)
 }

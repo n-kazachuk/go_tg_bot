@@ -2,35 +2,9 @@ package commander
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/n-kazachuk/go_tg_bot/internal/app/path"
-	"github.com/n-kazachuk/go_tg_bot/internal/services"
-	"github.com/n-kazachuk/go_tg_bot/internal/storages"
+	"github.com/n-kazachuk/go_tg_bot/internal/app/adapters/primary/telegram-bot-adapter/path"
 	"log"
 )
-
-const (
-	StartCommand = "start"
-	HelpCommand  = "help"
-	FindCommand  = "find"
-)
-
-type Commander struct {
-	bot      *tgbotapi.BotAPI
-	services *services.Service
-	storages *storages.Storage
-}
-
-func NewCommander(
-	bot *tgbotapi.BotAPI,
-	services *services.Service,
-	storages *storages.Storage,
-) *Commander {
-	return &Commander{
-		bot:      bot,
-		services: services,
-		storages: storages,
-	}
-}
 
 func (c *Commander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath *path.CallbackPath) {
 	switch callbackPath.CallbackName {
@@ -47,8 +21,19 @@ func (c *Commander) HandleCommand(msg *tgbotapi.Message, commandPath *path.Comma
 		c.Help(msg)
 	case FindCommand:
 		c.Find(msg)
+	case StopCommand:
+		c.Stop(msg)
 	default:
 		c.Default(msg)
+	}
+}
+
+func (c *Commander) GetAvailableCommands() []string {
+	return []string{
+		StartCommand,
+		HelpCommand,
+		FindCommand,
+		StopCommand,
 	}
 }
 
