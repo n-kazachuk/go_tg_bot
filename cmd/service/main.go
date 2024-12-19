@@ -21,7 +21,7 @@ func main() {
 
 	gr := graceful.New(
 		graceful.NewProcess(application.TelegramBotAdapter),
-		graceful.NewProcess(osSignalAdapter.New(log /*, cancel*/)),
+		graceful.NewProcess(osSignalAdapter.New(log)),
 	)
 
 	gr.SetLogger(log)

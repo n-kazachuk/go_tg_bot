@@ -12,11 +12,10 @@ import (
 
 type OsSignalAdapter struct {
 	log *slog.Logger
-	//cancel context.CancelFunc
 }
 
-func New(log *slog.Logger /*, cancel context.CancelFunc*/) *OsSignalAdapter {
-	return &OsSignalAdapter{log /*, cancel*/}
+func New(log *slog.Logger) *OsSignalAdapter {
+	return &OsSignalAdapter{log}
 }
 
 func (a *OsSignalAdapter) Start(ctx context.Context) error {
@@ -28,10 +27,6 @@ func (a *OsSignalAdapter) Start(ctx context.Context) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	case sig := <-ch:
-		err := fmt.Errorf("%s: system signal getted %s", helpers.GetFunctionName(), sig.String())
-
-		//a.cancel()
-
-		return err
+		return fmt.Errorf("%s: system signal getted %s", helpers.GetFunctionName(), sig.String())
 	}
 }
