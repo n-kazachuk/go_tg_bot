@@ -1,7 +1,6 @@
 package main
 
 import (
-	osSignalAdapter "github.com/n-kazachuk/go_tg_bot/internal/app/adapters/primary/os-signal-adapter"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/config"
 
 	"context"
@@ -21,7 +20,7 @@ func main() {
 
 	gr := graceful.New(
 		graceful.NewProcess(application.TelegramBotAdapter),
-		graceful.NewProcess(osSignalAdapter.New(log)),
+		graceful.NewProcess(application.OsSignalAdapter),
 	)
 
 	gr.SetLogger(log)
