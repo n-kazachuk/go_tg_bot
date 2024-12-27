@@ -52,6 +52,8 @@ func (c *Commander) Find(inputMessage *tgbotapi.Message) {
 		c.handleFromTime(inputMessage)
 	case ToTimeFindStep:
 		c.handleToTime(inputMessage)
+	default:
+		c.Default(inputMessage)
 	}
 }
 

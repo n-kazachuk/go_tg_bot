@@ -2,7 +2,6 @@ package commander
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"log"
 )
 
 func (c *Commander) Help(inputMessage *tgbotapi.Message) {
@@ -12,8 +11,5 @@ func (c *Commander) Help(inputMessage *tgbotapi.Message) {
 			"1. /find - Поиск билетов \n",
 	)
 
-	_, err := c.bot.Send(msg)
-	if err != nil {
-		log.Printf("Help: error sending reply message to chat - %v", err)
-	}
+	c.Send(msg)
 }

@@ -16,10 +16,6 @@ func (c *Commander) Start(inputMessage *tgbotapi.Message) {
 			"Это бот по поиску билетов", inputMessage.From.FirstName),
 	)
 
-	_, err := c.bot.Send(msg)
-	if err != nil {
-		log.Printf("Start: error sending reply message to chat - %v", err)
-	}
-
+	c.Send(msg)
 	c.Default(inputMessage)
 }

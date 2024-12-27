@@ -1,8 +1,6 @@
 package commander
 
 import (
-	"log"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -19,8 +17,5 @@ func (c *Commander) Default(inputMessage *tgbotapi.Message) {
 		),
 	)
 
-	_, err := c.bot.Send(msg)
-	if err != nil {
-		log.Printf("Default: error sending reply message to chat - %v", err)
-	}
+	c.Send(msg)
 }
