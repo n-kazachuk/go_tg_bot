@@ -1,4 +1,4 @@
-package model
+package user_context
 
 type UserContext struct {
 	ActiveCommand string

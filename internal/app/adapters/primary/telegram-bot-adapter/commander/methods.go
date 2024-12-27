@@ -3,6 +3,7 @@ package commander
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/adapters/primary/telegram-bot-adapter/path"
+	"github.com/n-kazachuk/go_tg_bot/internal/libs/logger/sl"
 	"log"
 )
 
@@ -36,15 +37,21 @@ func (c *Commander) GetAvailableCommands() []string {
 		StopCommand,
 	}
 }
+func (c *Commander) Send(msg tgbotapi.Chattable) {
+	_, err := c.bot.Send(msg)
+
+	if err != nil {
+		c.log.Error("Error with sending message to bot", sl.Err(err))
+	}
+}
 
 func (c *Commander) SendError(inputMessage *tgbotapi.Message, err error) {
 	msg := tgbotapi.NewMessage(inputMessage.Chat.ID,
-		"❌ Error!!! \n"+
-			err.Error(),
+		"❌ Ошибка: "+err.Error(),
 	)
 
 	_, err = c.bot.Send(msg)
 	if err != nil {
-		log.Printf("Commander.HandleError: error sending reply message to chat - %v", err)
+		c.log.Error("Error with sending error message to bot", sl.Err(err))
 	}
 }

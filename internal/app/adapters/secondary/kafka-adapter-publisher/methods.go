@@ -3,7 +3,7 @@ package kafka_adapter_publisher
 import (
 	"encoding/json"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/n-kazachuk/go_tg_bot/internal/app/domain/model"
+	"github.com/n-kazachuk/go_tg_bot/internal/app/domain/tickets-request"
 )
 
 // Produce main method to send kafka messages
@@ -35,7 +35,7 @@ func (a *KafkaAdapterPublisher) Produce(message []byte, topic string) error {
 	}
 }
 
-func (a *KafkaAdapterPublisher) SendTicketRequest(ticket *model.TicketRequest) error {
+func (a *KafkaAdapterPublisher) SendTicketRequest(ticket *tickets_request.TicketsRequest) error {
 	ticketJson, err := json.Marshal(ticket)
 	if err != nil {
 		return err

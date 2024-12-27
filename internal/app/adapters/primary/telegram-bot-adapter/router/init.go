@@ -5,6 +5,7 @@ import (
 	"github.com/n-kazachuk/go_tg_bot/internal/app/adapters/primary/telegram-bot-adapter/commander"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/adapters/primary/telegram-bot-adapter/path"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/application/usecases"
+	"log/slog"
 )
 
 type Commander interface {
@@ -15,14 +16,20 @@ type Commander interface {
 }
 
 type Router struct {
+	log     *slog.Logger
 	bot     *tgbotapi.BotAPI
 	service *usecases.UseCases
 
 	commander Commander
 }
 
-func New(bot *tgbotapi.BotAPI, service *usecases.UseCases) *Router {
-	cmdr := commander.NewCommander(bot, service)
+func New(log *slog.Logger, bot *tgbotapi.BotAPI, service *usecases.UseCases) *Router {
+	cmdr := commander.NewCommander(log, bot, service)
 
-	return &Router{bot, service, cmdr}
+	return &Router{
+		log,
+		bot,
+		service,
+		cmdr,
+	}
 }

@@ -1,15 +1,17 @@
 package user_context_repository_dummy
 
-import "github.com/n-kazachuk/go_tg_bot/internal/app/domain/model"
+import (
+	"github.com/n-kazachuk/go_tg_bot/internal/app/domain/user-context"
+)
 
-func (c *UserContextRepository) GetContext(userId int64) (*model.UserContext, error) {
+func (c *UserContextRepository) GetContext(userId int64) (*user_context.UserContext, error) {
 	context, exists := c.storage[userId]
 
 	if exists {
 		return context, nil
 	}
 
-	newContext := &model.UserContext{
+	newContext := &user_context.UserContext{
 		ActiveCommand: "",
 		Data:          nil,
 	}

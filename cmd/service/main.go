@@ -5,7 +5,7 @@ import (
 	"github.com/n-kazachuk/go_tg_bot/internal/app"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/config"
 	"github.com/n-kazachuk/go_tg_bot/internal/libs/graceful"
-	"github.com/n-kazachuk/go_tg_bot/internal/libs/slogpretty"
+	"github.com/n-kazachuk/go_tg_bot/internal/libs/logger/slogpretty"
 )
 
 func main() {

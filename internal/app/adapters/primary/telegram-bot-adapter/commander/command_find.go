@@ -1,16 +1,21 @@
 package commander
 
 import (
+	ticketsRequest "github.com/n-kazachuk/go_tg_bot/internal/app/domain/tickets-request"
+
+	"errors"
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/n-kazachuk/go_tg_bot/internal/app/domain/model"
-	"log"
+	"github.com/n-kazachuk/go_tg_bot/internal/libs/logger/sl"
 	"regexp"
 	"strings"
 	"time"
 )
 
 const (
+	DateFormat = "02.01.2006"
+	TimeFormat = "15:04"
+
 	InitFindStep = iota
 	FromCityFindStep
 	ToCityFindStep
@@ -19,17 +24,17 @@ const (
 	ToTimeFindStep
 )
 
-var userTicketRequests = make(map[int64]*model.TicketRequest)
+var userTicketsRequests = make(map[int64]*ticketsRequest.TicketsRequest)
 
 func (c *Commander) Find(inputMessage *tgbotapi.Message) {
 	userId := inputMessage.From.ID
-	ticketRequest, exists := userTicketRequests[userId]
+	ticketRequest, exists := userTicketsRequests[userId]
 
 	if !exists {
-		ticketRequest = model.NewTicketRequest()
+		ticketRequest = ticketsRequest.New()
 		ticketRequest.Step = InitFindStep
 
-		userTicketRequests[userId] = ticketRequest
+		userTicketsRequests[userId] = ticketRequest
 	}
 
 	step := ticketRequest.Step
@@ -59,12 +64,9 @@ func (c *Commander) askFromCity(inputMessage *tgbotapi.Message) {
 	)
 	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 
-	_, err := c.bot.Send(msg)
-	if err != nil {
-		log.Printf("Error sending reply message for step %d: %v", InitFindStep, err)
-	}
+	c.Send(msg)
 
-	userContext, err := c.service.GetUserContext(userId)
+	userContext, _ := c.service.GetUserContext(userId)
 	userContext.ActiveCommand = FindCommand
 
 	c.updateStep(inputMessage)
@@ -72,18 +74,10 @@ func (c *Commander) askFromCity(inputMessage *tgbotapi.Message) {
 
 func (c *Commander) handleFromCity(inputMessage *tgbotapi.Message) {
 	userId := inputMessage.From.ID
-	ticketRequest := userTicketRequests[userId]
+	ticketRequest := userTicketsRequests[userId]
 
-	if !c.validateCity(inputMessage.Text) {
-		msg := tgbotapi.NewMessage(
-			inputMessage.Chat.ID,
-			"Неверный формат города, пожалуйста, укажите город (формат: Минск).",
-		)
-
-		_, err := c.bot.Send(msg)
-		if err != nil {
-			log.Printf("Error sending reply message for step %d: %v", FromCityFindStep, err)
-		}
+	if err := c.validateCity(inputMessage.Text); err != nil {
+		c.SendError(inputMessage, err)
 		return
 	}
 
@@ -94,28 +88,16 @@ func (c *Commander) handleFromCity(inputMessage *tgbotapi.Message) {
 		"Укажите куда (формат: Москва):",
 	)
 
-	_, err := c.bot.Send(msg)
-	if err != nil {
-		log.Printf("Error sending reply message for step %d: %v", FromCityFindStep, err)
-	}
-
+	c.Send(msg)
 	c.updateStep(inputMessage)
 }
 
 func (c *Commander) handleToCity(inputMessage *tgbotapi.Message) {
 	userId := inputMessage.From.ID
-	ticketRequest := userTicketRequests[userId]
+	ticketRequest := userTicketsRequests[userId]
 
-	if !c.validateCity(inputMessage.Text) {
-		msg := tgbotapi.NewMessage(
-			inputMessage.Chat.ID,
-			"Неверный формат города, пожалуйста, укажите город (формат: Москва).",
-		)
-
-		_, err := c.bot.Send(msg)
-		if err != nil {
-			log.Printf("Error sending reply message for step %d: %v", ToCityFindStep, err)
-		}
+	if err := c.validateCity(inputMessage.Text); err != nil {
+		c.SendError(inputMessage, err)
 		return
 	}
 
@@ -126,159 +108,130 @@ func (c *Commander) handleToCity(inputMessage *tgbotapi.Message) {
 		"Укажите дату (формат: 01.01.2024):",
 	)
 
-	_, err := c.bot.Send(msg)
-	if err != nil {
-		log.Printf("Error sending reply message for step %d: %v", ToCityFindStep, err)
-	}
-
+	c.Send(msg)
 	c.updateStep(inputMessage)
 }
 
 func (c *Commander) handleDate(inputMessage *tgbotapi.Message) {
 	userId := inputMessage.From.ID
-	ticketRequest := userTicketRequests[userId]
+	ticketRequest := userTicketsRequests[userId]
 
-	if !c.validateDate(inputMessage.Text) {
-		msg := tgbotapi.NewMessage(
-			inputMessage.Chat.ID,
-			"Неверный формат даты, пожалуйста, укажите дату (формат: 01.01.2024).",
-		)
-
-		_, err := c.bot.Send(msg)
-		if err != nil {
-			log.Printf("Error sending reply message for step %d: %v", DateFindStep, err)
-		}
+	if err := c.validateDate(inputMessage.Text); err != nil {
+		c.SendError(inputMessage, err)
 		return
 	}
 
-	ticketRequest.Date = inputMessage.Text
+	ticketRequest.Date, _ = time.Parse(DateFormat, inputMessage.Text)
 
 	msg := tgbotapi.NewMessage(
 		inputMessage.Chat.ID,
 		"Укажите с какого времени (формат: 13:00):",
 	)
 
-	_, err := c.bot.Send(msg)
-	if err != nil {
-		log.Printf("Error sending reply message for step %d: %v", DateFindStep, err)
-	}
-
+	c.Send(msg)
 	c.updateStep(inputMessage)
 }
 
 func (c *Commander) handleFromTime(inputMessage *tgbotapi.Message) {
 	userId := inputMessage.From.ID
-	ticketRequest := userTicketRequests[userId]
+	ticketRequest := userTicketsRequests[userId]
 
-	if !c.validateTime(inputMessage.Text) {
-		msg := tgbotapi.NewMessage(
-			inputMessage.Chat.ID,
-			"Неверный формат времени, пожалуйста, укажите время (формат: 13:00).",
-		)
-
-		_, err := c.bot.Send(msg)
-		if err != nil {
-			log.Printf("Error sending reply message for step %d: %v", FromTimeFindStep, err)
-		}
+	if err := c.validateTime(inputMessage.Text); err != nil {
+		c.SendError(inputMessage, err)
 		return
 	}
 
-	ticketRequest.FromTime = inputMessage.Text
+	ticketRequest.FromTime, _ = time.Parse(TimeFormat, inputMessage.Text)
 
 	msg := tgbotapi.NewMessage(
 		inputMessage.Chat.ID,
 		"Укажите по какое время (формат: 18:00):",
 	)
 
-	_, err := c.bot.Send(msg)
-	if err != nil {
-		log.Printf("Error sending reply message for step %d: %v", FromTimeFindStep, err)
-	}
-
+	c.Send(msg)
 	c.updateStep(inputMessage)
 }
 
 func (c *Commander) handleToTime(inputMessage *tgbotapi.Message) {
 	userId := inputMessage.From.ID
-	ticketRequest := userTicketRequests[userId]
+	ticketRequest := userTicketsRequests[userId]
 
-	if !c.validateTime(inputMessage.Text) {
-		msg := tgbotapi.NewMessage(
-			inputMessage.Chat.ID,
-			"Неверный формат времени, пожалуйста, укажите время (формат: 18:00).",
-		)
-
-		_, err := c.bot.Send(msg)
-		if err != nil {
-			log.Printf("Error sending reply message for step %d: %v", ToTimeFindStep, err)
-		}
+	if err := c.validateTime(inputMessage.Text); err != nil {
+		c.SendError(inputMessage, err)
 		return
 	}
 
-	ticketRequest.ToTime = inputMessage.Text
+	ticketRequest.ToTime, _ = time.Parse(TimeFormat, inputMessage.Text)
 
 	err := c.service.SendTicketSearchRequest(ticketRequest)
 	if err != nil {
-		log.Printf("Error adding ticket request: %v", err)
+		c.log.Error("Error adding ticket request", sl.Err(err))
 	}
 
 	msg := tgbotapi.NewMessage(
 		inputMessage.Chat.ID,
 		fmt.Sprintf(
-			"Начинаю поиск билетов по маршруту %s - %s на дату %s с %s по %s...",
-			ticketRequest.FromCity, ticketRequest.ToCity, ticketRequest.Date, ticketRequest.FromTime, ticketRequest.ToTime),
+			"Начинаю поиск билетов (*%s*): \n"+
+				"*Из:* %s, \n"+
+				"*В:* %s, \n"+
+				"*На время:* %s - %s",
+			ticketRequest.Date.Format(DateFormat), ticketRequest.FromCity, ticketRequest.ToCity,
+			ticketRequest.FromTime.Format(TimeFormat), ticketRequest.ToTime.Format(TimeFormat)),
 	)
 
-	_, err = c.bot.Send(msg)
-	if err != nil {
-		log.Printf("Error sending reply message for step %d: %v", ToTimeFindStep, err)
-	}
+	msg.ParseMode = tgbotapi.ModeMarkdown
+
+	c.Send(msg)
 
 	err = c.service.ClearUserContext(userId)
 	if err != nil {
-		log.Printf("Error clearing context: %v", err)
+		c.log.Error("Error clearing context", sl.Err(err))
 	}
 
-	delete(userTicketRequests, userId)
+	delete(userTicketsRequests, userId)
 
 	c.Default(inputMessage)
 }
 
 func (c *Commander) updateStep(inputMessage *tgbotapi.Message) {
 	userId := inputMessage.From.ID
-	ticketRequest := userTicketRequests[userId]
+	ticketRequest := userTicketsRequests[userId]
 	ticketRequest.Step++
 }
 
-func (c *Commander) validateCity(city string) bool {
+func (c *Commander) validateCity(city string) error {
 	if city == "" {
-		return false
+		return errors.New("передана пустая строка")
 	}
 
 	re := regexp.MustCompile("^[А-ЯЁа-яё]+$")
 	if !re.MatchString(city) {
-		return false
+		return fmt.Errorf("город указан в неверном формате")
 	}
 
-	return true
+	return nil
 }
 
-func (c *Commander) validateDate(date string) bool {
-	parsedDate, err := time.Parse("02.01.2006", date)
+func (c *Commander) validateDate(date string) error {
+	parsedDate, err := time.Parse(DateFormat, date)
 	if err != nil {
-		return false
+		return errors.New("неверный формат даты")
 	}
 
 	currentDate := time.Now().Truncate(24 * time.Hour)
 
 	if parsedDate.Before(currentDate) {
-		return false
+		return errors.New("дата не может быть меньше текущей")
 	}
 
-	return true
+	return nil
 }
 
-func (c *Commander) validateTime(t string) bool {
-	_, err := time.Parse("15:04", t)
-	return err == nil
+func (c *Commander) validateTime(t string) error {
+	_, err := time.Parse(TimeFormat, t)
+	if err != nil {
+		return errors.New("неверный формат времени")
+	}
+
+	return nil
 }

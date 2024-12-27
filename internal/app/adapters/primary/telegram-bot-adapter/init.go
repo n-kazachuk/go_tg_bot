@@ -33,7 +33,7 @@ func New(log *slog.Logger, cfg *config.TelegramConfig, service *usecases.UseCase
 
 	telegramBotApi.Debug = cfg.Debug
 
-	routerHandler := router.New(telegramBotApi, service)
+	routerHandler := router.New(log, telegramBotApi, service)
 
 	return &TelegramBotAdapter{log, cfg, telegramBotApi, routerHandler}
 }

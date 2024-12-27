@@ -3,6 +3,7 @@ package commander
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/n-kazachuk/go_tg_bot/internal/app/application/usecases"
+	"log/slog"
 )
 
 const (
@@ -15,10 +16,11 @@ const (
 )
 
 type Commander struct {
+	log     *slog.Logger
 	bot     *tgbotapi.BotAPI
 	service *usecases.UseCases
 }
 
-func NewCommander(bot *tgbotapi.BotAPI, service *usecases.UseCases) *Commander {
-	return &Commander{bot, service}
+func NewCommander(log *slog.Logger, bot *tgbotapi.BotAPI, service *usecases.UseCases) *Commander {
+	return &Commander{log, bot, service}
 }

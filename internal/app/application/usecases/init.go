@@ -1,7 +1,8 @@
 package usecases
 
 import (
-	"github.com/n-kazachuk/go_tg_bot/internal/app/domain/model"
+	"github.com/n-kazachuk/go_tg_bot/internal/app/domain/tickets-request"
+	"github.com/n-kazachuk/go_tg_bot/internal/app/domain/user-context"
 	"log/slog"
 )
 
@@ -12,12 +13,12 @@ type UseCases struct {
 }
 
 type userContextRepository interface {
-	GetContext(userId int64) (*model.UserContext, error)
+	GetContext(userId int64) (*user_context.UserContext, error)
 	ClearContext(userID int64) error
 }
 
 type tickerRequestSender interface {
-	SendTicketRequest(ticket *model.TicketRequest) error
+	SendTicketRequest(ticket *tickets_request.TicketsRequest) error
 }
 
 func New(
