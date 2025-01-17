@@ -10,7 +10,8 @@ const (
 	StartCommand = "start"
 	HelpCommand  = "help"
 	FindCommand  = "1 🔍"
-	StopCommand  = "2 ❎"
+	ListCommand  = "2 📃"
+	StopCommand  = "3 ❎"
 
 	DefaultCommand = "default"
 )

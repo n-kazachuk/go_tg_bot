@@ -17,7 +17,7 @@ type App struct {
 }
 
 func New(log *slog.Logger, cfg *config.Config) *App {
-	userContextRepository := userContextRepositoryDummy.NewUserContextRepository()
+	userContextRepository := userContextRepositoryDummy.New()
 	kfkAdapterPublisher := kafkaAdapterPublisher.New(&cfg.Kafka)
 
 	usc := usecases.New(

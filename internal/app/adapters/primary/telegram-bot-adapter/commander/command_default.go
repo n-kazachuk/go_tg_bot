@@ -7,13 +7,15 @@ import (
 func (c *Commander) Default(inputMessage *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(inputMessage.Chat.ID,
 		"1. Начать поиск \n"+
-			"2. Остановить поиск",
+			"2. Список \n"+
+			"3. Остановить поиск",
 	)
 
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
-			tgbotapi.NewKeyboardButton("1 🔍"),
-			tgbotapi.NewKeyboardButton("2 ❎"),
+			tgbotapi.NewKeyboardButton(FindCommand),
+			tgbotapi.NewKeyboardButton(ListCommand),
+			tgbotapi.NewKeyboardButton(StopCommand),
 		),
 	)
 

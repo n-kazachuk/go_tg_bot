@@ -173,9 +173,9 @@ func (c *Commander) handleToTime(inputMessage *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(
 		inputMessage.Chat.ID,
 		fmt.Sprintf(
-			"Начинаю поиск билетов (*%s*): \n"+
-				"*Из:* %s, \n"+
-				"*В:* %s, \n"+
+			"Начинаю поиск билетов (*%s*) 🕵: \n"+
+				"*Из:* %s \n"+
+				"*В:* %s \n"+
 				"*На время:* %s - %s",
 			ticketRequest.Date.Format(DateFormat), ticketRequest.FromCity, ticketRequest.ToCity,
 			ticketRequest.FromTime.Format(TimeFormat), ticketRequest.ToTime.Format(TimeFormat)),

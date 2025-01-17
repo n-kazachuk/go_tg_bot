@@ -10,7 +10,7 @@ type UserContextRepository struct {
 	mu      sync.RWMutex
 }
 
-func NewUserContextRepository() *UserContextRepository {
+func New() *UserContextRepository {
 	return &UserContextRepository{
 		storage: make(map[int64]*user_context.UserContext),
 	}
